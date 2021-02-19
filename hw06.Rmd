@@ -1,0 +1,87 @@
+---
+title: "HW06: Income Data"
+author: "Julia Du"
+date: "2/18/2021"
+output: 
+  github_document:
+    toc: true
+---
+
+```{r setup, echo=FALSE}
+#knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+## Load necessary libraries
+
+```{r, echo = FALSE}
+library(tidyverse)
+library(glue)
+library(knitr)
+
+theme_set(theme_minimal())
+```
+
+# Get the Data
+I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-02-09). This particular challenge comes from the Urban Institute and looks at racial wealth inequality over time.
+
+*income_time*
+
+```{r, message = FALSE, warning = FALSE}
+lifetime_earn <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/lifetime_earn.csv')
+student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
+retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
+home_owner <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/home_owner.csv')
+race_wealth <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/race_wealth.csv')
+income_time <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_time.csv')
+income_limits <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_limits.csv')
+income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
+income_distribution <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_distribution.csv')
+income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
+
+
+```
+
+
+
+```{r}
+home_owner %>% 
+  inner_join(student_debt, by = c("year", "race")) %>%
+  ggplot(mapping = aes(x = home_owner_pct, y = loan_debt_pct, fill = race)) +
+  #geom_line()
+  geom_boxplot()
+
+home_owner %>% 
+  inner_join(student_debt, by = c("year", "race")) %>%
+  ggplot(mapping = aes(x = home_owner_pct, y = loan_debt_pct, color = race)) +
+  #geom_line()
+  geom_point() +
+  geom_smooth()
+
+
+home_owner %>%
+  group_by(year, race) %>%
+  ggplot(mapping = aes(x = year, y = home_owner_pct, color = race)) +
+#  geom_col(position = position_dodge2(width = 0.9, preserve = "single"))
+  geom_line()
+```
+
+
+
+```{r}
+income_mean %>%
+  filter(
+    dollar_type == "2019 Dollars",
+    income_quintile == "Middle",
+    !race %in% c("Asian Alone or in Combination", "Black Alone or in Combination", "White Alone")
+    ) %>%
+    group_by(year, race) %>%
+  ggplot(mapping = aes(x = year, y = income_dollars, color = race)) +
+  geom_line()
+```
+
+
+
+```{r}
+
+```
