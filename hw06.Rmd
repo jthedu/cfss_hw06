@@ -15,6 +15,7 @@ output:
 ## Load necessary libraries
 
 ```{r, echo = FALSE}
+library(reprex)
 library(tidyverse)
 library(glue)
 library(knitr)
@@ -28,21 +29,61 @@ I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatasci
 *income_time*
 
 ```{r, message = FALSE, warning = FALSE}
-lifetime_earn <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/lifetime_earn.csv')
 student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
 retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
 home_owner <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/home_owner.csv')
-race_wealth <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/race_wealth.csv')
-income_time <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_time.csv')
-income_limits <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_limits.csv')
+#race_wealth <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/race_wealth.csv')
 income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
-income_distribution <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_distribution.csv')
 income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
 
 
 ```
 
+The data provided here has been normalized to 2016 dollars in some datasets and to 2019 dollars in others. For consistency's sake, I will normalize all dollar amounts to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
 
+Currently, student_debt.csv (loan_debt), retirement.csv (retirement), and race_wealth.csv (wealth_family) are in 2016 dollars. 
+
+income_mean.csv (income_dollars) is in 2019 dollars.
+
+
+```{r normalize}
+# only keeping values normalized to 2019
+income_mean <- income_mean %>%
+  filter(dollar_type == "2019 Dollars")
+
+# purchasing power rates
+start_2016 <- 1.05940
+
+normalize <- function(df, column) {
+  df %>%
+    mutate(glue_data("norm_{column}") := {{column}} * start_2016) 
+    #  rename(glue('normalized_{{column}}') = {{normalized}})
+  # per tidyverse rules, have to use {{}} to indicate I'm choosing a column 
+  # https://dplyr.tidyverse.org/articles/programming.html 
+}
+
+student_debt <- normalize(df = student_debt, column = loan_debt)
+
+retirement <- normalize(retirement, retirement)
+
+# possible to write func to overwrite original df?
+# possible to write func so that normalized column name is "normalized_column"
+```
+
+```{r}
+# visualizing aggregate income
+# compare # of households to income_share
+income_aggregate %>%
+  filter(race == "All Races") %>%
+  ggplot(mapping = aes(x = number, y = income_share, color = income_quintile, group = income_quintile)) +
+  geom_line()
+
+income_aggregate %>%
+  filter(race == "All Races") %>%
+  ggplot(mapping = aes(x = year, y = income_share, color = income_quintile, group = income_quintile)) +
+  geom_line()
+
+```
 
 ```{r}
 home_owner %>% 
@@ -51,6 +92,7 @@ home_owner %>%
   #geom_line()
   geom_boxplot()
 
+
 home_owner %>% 
   inner_join(student_debt, by = c("year", "race")) %>%
   ggplot(mapping = aes(x = home_owner_pct, y = loan_debt_pct, color = race)) +
@@ -58,7 +100,7 @@ home_owner %>%
   geom_point() +
   geom_smooth()
 
-
+#home ownership over the yrs
 home_owner %>%
   group_by(year, race) %>%
   ggplot(mapping = aes(x = year, y = home_owner_pct, color = race)) +
@@ -69,6 +111,8 @@ home_owner %>%
 
 
 ```{r}
+# comparing mean income of median quintile of racial groups over the yrs
+
 income_mean %>%
   filter(
     dollar_type == "2019 Dollars",
@@ -77,7 +121,10 @@ income_mean %>%
     ) %>%
     group_by(year, race) %>%
   ggplot(mapping = aes(x = year, y = income_dollars, color = race)) +
-  geom_line()
+  #geom_line() +
+  geom_point(alpha = .3) + 
+  geom_smooth(method = lm, se = FALSE) +
+  scale_color_viridis_d(option = "plasma", end = .7)
 ```
 
 
