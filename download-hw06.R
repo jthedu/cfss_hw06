@@ -10,8 +10,8 @@ race_wealth <- readr::read_csv('https://raw.githubusercontent.com/rfordatascienc
 income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
 income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
 
-
-
+#also using ggplot-provided presidents data
+president <- readr::read_csv('https://gist.githubusercontent.com/namuol/2657233/raw/74135b2637e624848c163759be9cd14ae33f5153/presidents.csv')
 
 
 

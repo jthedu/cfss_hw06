@@ -19,6 +19,7 @@ library(reprex)
 library(tidyverse)
 library(glue)
 library(knitr)
+library(lubridate)
 
 theme_set(theme_minimal())
 ```
@@ -45,11 +46,22 @@ Currently, student_debt.csv (loan_debt), retirement.csv (retirement), and race_w
 income_mean.csv (income_dollars) is in 2019 dollars.
 
 
-```{r normalize}
-# only keeping values normalized to 2019 & renaming middle quintile to "Third" for future df joining 
+```{r cleanup}
 income_mean <- income_mean %>%
   filter(dollar_type == "2019 Dollars") %>%
   mutate(income_quintile = if_else(income_quintile == "Middle", "Third", income_quintile))
+
+#reordering inc quint levels
+income_leveled <- c("Lowest", "Fourth", "Third", "Second", "Highest", "Top 5%")
+
+income_aggregate <- income_aggregate %>%
+  mutate(income_quintile = factor(income_quintile, levels = income_leveled)) 
+
+income_mean <- income_mean %>%
+  mutate(income_quintile = factor(income_quintile, levels = income_leveled))
+
+# only keeping values normalized to 2019 & renaming middle quintile to "Third" for future df joining 
+
 
 # purchasing power rates
 start_2016 <- 1.05940
@@ -63,7 +75,8 @@ normalize <- function(df, column) {
   # https://dplyr.tidyverse.org/articles/programming.html 
 }
 
-student_debt <- normalize(df = student_debt, column = loan_debt)
+#student_debt <- 
+  normalize(df = student_debt, column = loan_debt)
 
 retirement <- normalize(retirement, retirement)
 
@@ -75,24 +88,16 @@ retirement <- normalize(retirement, retirement)
 # visualizing aggregate income
 # recall: each income quintile has the same # of ppl in it
 
-#reordering inc quint levels
-income_leveled <- c("Lowest", "Fourth", "Third", "Second", "Highest", "Top 5%")
-
-income_aggregate <- income_aggregate %>%
-  mutate(income_quintile = factor(income_quintile, levels = income_leveled)) 
-
-income_mean <- income_mean %>%
-  mutate(income_quintile = factor(income_quintile, levels = income_leveled))
-
-# compare # of households to income_share
-income_aggregate %>%
-  filter(race == "All Races") %>%
-  ggplot(mapping = aes(x = number, y = income_share, color = income_quintile, group = income_quintile)) +
-  geom_line()
+### compare # of households to income_share
 
 income_aggregate %>%
   filter(race == "All Races") %>%
   ggplot(mapping = aes(x = year, y = income_share, color = income_quintile, group = income_quintile)) +
+  geom_line()
+
+income_mean %>%
+  filter(race == "All Races") %>%
+  ggplot(mapping = aes(x = year, y = income_dollars, color = income_quintile, group = income_quintile)) +
   geom_line()
 
 income_aggregate %>%
@@ -113,14 +118,6 @@ home_owner %>%
   #geom_line()
   geom_boxplot()
 
-
-home_owner %>% 
-  inner_join(student_debt, by = c("year", "race")) %>%
-  ggplot(mapping = aes(x = home_owner_pct, y = loan_debt_pct, color = race)) +
-  #geom_line()
-  geom_point() +
-  geom_smooth()
-
 #home ownership over the yrs
 home_owner %>%
   group_by(year, race) %>%
@@ -137,7 +134,7 @@ home_owner %>%
 income_mean %>%
   filter(
     dollar_type == "2019 Dollars", #already did this earlier in set-up
-    income_quintile == "Middle",
+    income_quintile == "Third", # was originally "Middle" but then renamed this value
     !race %in% c("Asian Alone or in Combination", "Black Alone or in Combination", "White Alone")
     ) %>%
     group_by(year, race) %>%
@@ -146,10 +143,51 @@ income_mean %>%
   geom_point(alpha = .3) + 
   geom_smooth(method = lm, se = FALSE) +
   scale_color_viridis_d(option = "plasma", end = .7)
+
 ```
 
 
 
-```{r}
+```{r president}
+pres_levels <- c("Lyndon B. Johnson", "Richard Nixon", "Gerald Ford", "Jimmy Carter", "Ronald Reagan", "George H. W. Bush", "Bill Clinton", "George W. Bush", "Barack Obama", "Donald Trump")
 
+president <- president %>%
+  rename(
+    start = "Took office", 
+    end = "Left office",
+    name = "President"
+    ) %>%
+  select(c(name, start, end)) %>%
+  mutate(start = dmy(start), end = dmy(end)) %>%
+  mutate(start = year(start), end = year(end)) %>%
+  mutate(end = if_else(is.na(end), 2017, end)) %>%
+  add_row(name = "Donald Trump", start = 2017, end = 2021) %>%
+  filter(end > 1967) %>%
+  mutate(name = fct_relevel(name, pres_levels))
+
+
+pres_income_df <- income_mean %>%
+  filter(race == "All Races",
+         income_quintile == "Third") %>%
+  group_by(year)
+
+med_income_line <- pres_income_df %>%
+  ggplot(mapping = aes(x = year, y = income_dollars)) +
+  geom_line() +
+  labs(title = "Mean U.S. income over time",
+       x = "Year", y = "Mean income (normalized 2019 dollars)",
+       caption = "Source: The Urban Institute") 
+
+# this is the mean income of the middle quintile of US
+
+med_income_line + 
+  geom_rect(data = president, 
+            mapping = aes(NULL, NULL, xmin = start, xmax = end, 
+                          ymin = min(pres_income_df$income_dollars), ymax = max(pres_income_df$income_dollars), 
+                          fill = name), 
+            alpha = 0.3) +
+  labs(fill = "President") +
+  theme(legend.position = "bottom")
+
+# makes sense. can see income tumbled during Carter's term (stagflation of 1970s) as well as 1st part of Obama's term (08 financial crisis)
 ```
