@@ -116,7 +116,6 @@ income_mean %>%
        caption = "Source: The Urban Institute", color = "Income Quintile") +
   scale_y_continuous(labels = scales::dollar)
 
-
 income_aggregate %>%
 #  inner_join(income_mean, by = c("year", "race", "income_quintile")) %>% 
   ggplot(mapping = aes(x = income_quintile, y = income_share/100, fill = income_quintile)) +
@@ -133,11 +132,47 @@ income_aggregate %>%
 ```
 
 ```{r}
+# comparing mean income of median quintile of racial groups over the yrs
+
+income_mean %>%
+  filter(
+    dollar_type == "2019 Dollars", #already did this earlier in set-up
+    income_quintile == "Third" # was originally "Middle" but then renamed this value
+    ) %>%
+    group_by(year, race) %>%
+  ggplot(mapping = aes(x = year, y = income_dollars, color = race)) +
+  #geom_line() +
+  geom_point(alpha = .3) + 
+  geom_smooth(method = lm, se = FALSE) +
+  scale_color_viridis_d(option = "plasma", end = .7) +
+  labs(title = "Mean Income by Race Over Time",
+       x = "Year", y = "Mean income (in normalized 2019 dollars)",
+       caption = "Source: The Urban Institute", color = "Race") +
+  scale_y_continuous(labels = scales::dollar)
+
+```
+
+
+```{r, message = FALSE}
 # creating comparable mean income table 
 meaninc_compare <- income_mean %>% 
   filter(income_quintile == "Third") %>%
   mutate(race = if_else(race == "Black Alone", "Black", race)) %>%
   mutate(race = ifelse(race == "White, Not Hispanic", "White", race))
+
+meaninc_compare %>%
+  inner_join(student_debt, by = c("year", "race")) %>%
+  inner_join(retirement, by = c("year", "race")) %>%
+  group_by(race) %>%
+  summarize(mean(income_dollars), mean(loan_debt), mean(retirement)) %>%
+  knitr::kable(
+    caption = "Averages of family wealth indicators (2019 dollars)", 
+    col.names = c(
+      "Race",
+      "Mean income", 
+      "Loan debt", 
+      "Retirement savings"),
+    digits = 2)
 
 compare_inc <- function(df, var){
 meaninc_compare %>% 
@@ -179,7 +214,7 @@ compare_inc(home_owner, home_owner_pct) +
 
 ```
 
-```{r, message = FALSE}
+```{r}
 home_owner %>% 
   inner_join(student_debt, by = c("year", "race")) %>%
   select(-loan_debt) %>%
@@ -195,52 +230,6 @@ home_owner %>%
   scale_fill_discrete(labels = c("Home ownership", "Student loan debt")) +
   scale_y_continuous(labels = scales::percent) +
   theme(legend.position = "bottom")
-
-  
-  
-meaninc_compare %>%
-  inner_join(student_debt, by = c("year", "race")) %>%
-  inner_join(retirement, by = c("year", "race")) %>%
-  group_by(race) %>%
-  summarize(mean(income_dollars), mean(loan_debt), mean(retirement)) %>%
-  knitr::kable(
-    caption = "Averages of family wealth indicators (2019 dollars)", 
-    col.names = c(
-      "Race",
-      "Mean income", 
-      "Loan debt", 
-      "Retirement savings"),
-    digits = 2)
-
-#home ownership over the yrs
-home_owner %>%
-  group_by(year, race) %>%
-  ggplot(mapping = aes(x = year, y = home_owner_pct, color = race)) +
-#  geom_col(position = position_dodge2(width = 0.9, preserve = "single"))
-  geom_line()
-```
-
-
-
-```{r}
-# comparing mean income of median quintile of racial groups over the yrs
-
-income_mean %>%
-  filter(
-    dollar_type == "2019 Dollars", #already did this earlier in set-up
-    income_quintile == "Third" # was originally "Middle" but then renamed this value
-    ) %>%
-    group_by(year, race) %>%
-  ggplot(mapping = aes(x = year, y = income_dollars, color = race)) +
-  #geom_line() +
-  geom_point(alpha = .3) + 
-  geom_smooth(method = lm, se = FALSE) +
-  scale_color_viridis_d(option = "plasma", end = .7) +
-  labs(title = "Mean Income by Race Over Time",
-       x = "Year", y = "Mean income (in normalized 2019 dollars)",
-       caption = "Source: The Urban Institute", color = "Race") +
-  scale_y_continuous(labels = scales::dollar)
-
 
 ```
 
