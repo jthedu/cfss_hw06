@@ -31,7 +31,7 @@ I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatasci
 
 ```{r, message = FALSE, warning = FALSE}
 student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
-retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
+#retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
 home_owner <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/home_owner.csv')
 #race_wealth <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/race_wealth.csv')
 income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
@@ -68,21 +68,27 @@ start_2016 <- 1.05940
 
 normalize <- function(df, column) {
   df %>%
-    mutate(normalized = {{column}} * start_2016)
-    #    mutate(glue_data("norm_{column}") := {{column}} * start_2016) 
-    #  rename(glue('normalized_{{column}}') = {{normalized}})
-  # per tidyverse rules, have to use {{}} to indicate I'm choosing a column 
-  # https://dplyr.tidyverse.org/articles/programming.html 
+    mutate({column} = {{column}} * start_2016) 
+  #alternatively: mutate({{column}} = {{column}} * start_2016)
 }
 
-#student_debt <- 
+
+#student_debt 
   normalize(df = student_debt, column = loan_debt)
 
 retirement <- normalize(retirement, retirement)
 
-# possible to write func to overwrite original df?
+    #    mutate(glue_data("norm_{column}") := {{column}} * start_2016) 
+    #  rename(glue('normalized_{{column}}') = {{normalized}})
+
+  # per tidyverse rules, have to use {{}} to indicate I'm choosing a column 
+  # https://dplyr.tidyverse.org/articles/programming.html 
+
+
+# possible to write func to overwrite original df? no
 # possible to write func so that normalized column name is "normalized_column"
 ```
+
 
 ```{r}
 # visualizing aggregate income
