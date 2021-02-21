@@ -33,7 +33,6 @@ I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatasci
 student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
 #retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
 home_owner <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/home_owner.csv')
-#race_wealth <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/race_wealth.csv')
 income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
 income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
 
@@ -130,19 +129,45 @@ income_aggregate %>%
   theme(axis.text.x = element_blank())
 # so historically, highest income_quintile has had greatest share of income
 # should you even be making this graph?
+```
 
-
-income_mean %>% #creating comparable income_mean df for retirement, debt, homeowner
+```{r}
+# creating comparable mean income table 
+meaninc_compare <- income_mean %>% 
   filter(income_quintile == "Third") %>%
   mutate(race = if_else(race == "Black Alone", "Black", race)) %>%
-  mutate(race = ifelse(race == "White, Not Hispanic", "White", race)) %>% #would stop here if want to make this its own obj
-  inner_join(retirement, by = c("year", "race")) %>%
-  ggplot(mapping = aes(x = income_dollars, y = retirement, color = race)) +
-  geom_line() +
-  labs(title = "Mean Family Income vs. Retirement Savings (normalized 2019 dollars)",
+  mutate(race = ifelse(race == "White, Not Hispanic", "White", race))
+
+compare_inc <- function(df, var){
+meaninc_compare %>% 
+  inner_join({df}, by = c("year", "race")) %>%
+  ggplot(mapping = aes(x = income_dollars, y = {{var}}, color = race)) +
+  geom_line()  
+}
+
+# retirement
+compare_inc(retirement, retirement) +
+  labs(title = "Mean Family Income vs. Mean Retirement Savings (normalized 2019 dollars)",
        x = "Average family income", y = "Average family retirement savings",
        caption = "Source: The Urban Institute",
-       color = "Income Quintile") 
+       color = "Race") 
+
+# student debt
+compare_inc(student_debt, loan_debt) +
+  labs(title = "Mean Family Income vs. Mean Family Student Loan Debt (normalized 2019 dollars)",
+       x = "Average family income", y = "Average family student loan debt for aged 25-55",
+       caption = "Source: The Urban Institute",
+       color = "Race") 
+
+# homeownership
+compare_inc(home_owner, home_owner_pct) +
+  labs(title = "Mean Family Income (normalized 2019 dollars) vs. Home Ownership",
+       x = "Average family income", y = "Home ownership percentage for families",
+       caption = "Source: The Urban Institute",
+       color = "Race") +
+  scale_y_continuous(labels = scales::percent)
+
+
 ```
 
 ```{r}
