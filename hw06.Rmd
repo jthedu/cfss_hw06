@@ -113,7 +113,8 @@ income_mean %>%
   geom_line() +
   labs(title = "Mean Income of Each Income Quintile Over Time",
        x = "Year", y = "Mean income (in normalized 2019 dollars)",
-       caption = "Source: The Urban Institute", color = "Income Quintile") 
+       caption = "Source: The Urban Institute", color = "Income Quintile") +
+  scale_y_continuous(labels = scales::dollar)
 
 
 income_aggregate %>%
@@ -142,7 +143,9 @@ compare_inc <- function(df, var){
 meaninc_compare %>% 
   inner_join({df}, by = c("year", "race")) %>%
   ggplot(mapping = aes(x = income_dollars, y = {{var}}, color = race)) +
-  geom_line()  
+  geom_line() +
+    scale_color_viridis_d(end = .7) +
+  scale_x_continuous(labels = scales::dollar)
 }
 
 # retirement
@@ -150,14 +153,17 @@ compare_inc(retirement, retirement) +
   labs(title = "Mean Family Income vs. Mean Retirement Savings (normalized 2019 dollars)",
        x = "Average family income", y = "Average family retirement savings",
        caption = "Source: The Urban Institute",
-       color = "Race") 
+       color = "Race") +
+  scale_y_continuous(labels = scales::dollar)
+
 
 # student debt
 compare_inc(student_debt, loan_debt) +
   labs(title = "Mean Family Income vs. Mean Family Student Loan Debt (normalized 2019 dollars)",
        x = "Average family income", y = "Average family student loan debt for aged 25-55",
        caption = "Source: The Urban Institute",
-       color = "Race") 
+       color = "Race") +
+  scale_y_continuous(labels = scales::dollar)
 
 # homeownership
 compare_inc(home_owner, home_owner_pct) +
@@ -200,7 +206,12 @@ income_mean %>%
   #geom_line() +
   geom_point(alpha = .3) + 
   geom_smooth(method = lm, se = FALSE) +
-  scale_color_viridis_d(option = "plasma", end = .7)
+  scale_color_viridis_d(option = "plasma", end = .7) +
+  labs(title = "Mean Income by Race Over Time",
+       x = "Year", y = "Mean income (in normalized 2019 dollars)",
+       caption = "Source: The Urban Institute", color = "Race") +
+  scale_y_continuous(labels = scales::dollar)
+
 
 ```
 
@@ -223,7 +234,6 @@ president <- president %>%
   filter(end > 1967) %>%
   mutate(name = fct_relevel(name, pres_levels))
 
-
 pres_income_df <- income_mean %>%
   filter(race == "All Races",
          income_quintile == "Third") %>%
@@ -234,7 +244,8 @@ med_income_line <- pres_income_df %>%
   geom_line() +
   labs(title = "Mean U.S. income over time",
        x = "Year", y = "Mean income (normalized 2019 dollars)",
-       caption = "Source: The Urban Institute") 
+       caption = "Source: The Urban Institute") +
+  scale_y_continuous(label = scales::dollar)
 
 # this is the mean income of the middle quintile of US
 
