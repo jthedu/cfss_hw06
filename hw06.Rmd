@@ -31,7 +31,7 @@ I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatasci
 
 ```{r, message = FALSE, warning = FALSE}
 student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
-#retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
+retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
 home_owner <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/home_owner.csv')
 income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
 income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
@@ -145,21 +145,24 @@ meaninc_compare %>%
   ggplot(mapping = aes(x = income_dollars, y = {{var}}, color = race)) +
   geom_line() +
     scale_color_viridis_d(end = .7) +
-  scale_x_continuous(labels = scales::dollar)
+  scale_x_continuous(labels = scales::dollar) +
+    theme(legend.position = "bottom")
 }
 
 # retirement
 compare_inc(retirement, retirement) +
-  labs(title = "Mean Family Income vs. Mean Retirement Savings (normalized 2019 dollars)",
+  labs(title = "Mean Family Income vs. Mean Retirement Savings", 
+       subtitle = "(normalized 2019 dollars)",
        x = "Average family income", y = "Average family retirement savings",
        caption = "Source: The Urban Institute",
        color = "Race") +
-  scale_y_continuous(labels = scales::dollar)
+  scale_y_continuous(labels = scales::dollar) 
 
 
 # student debt
 compare_inc(student_debt, loan_debt) +
-  labs(title = "Mean Family Income vs. Mean Family Student Loan Debt (normalized 2019 dollars)",
+  labs(title = "Mean Family Income vs. Mean Family Student Loan Debt", 
+       subtitle = "(normalized 2019 dollars)",
        x = "Average family income", y = "Average family student loan debt for aged 25-55",
        caption = "Source: The Urban Institute",
        color = "Race") +
@@ -176,12 +179,26 @@ compare_inc(home_owner, home_owner_pct) +
 
 ```
 
-```{r}
+```{r, message = FALSE}
 home_owner %>% 
-  inner_join(student_debt, by = c("year", "race")) %>%
-  ggplot(mapping = aes(x = home_owner_pct, y = loan_debt_pct, fill = race)) +
+ # inner_join(student_debt, by = c("year", "race")) %>%
+  ggplot(mapping = aes(x = race, y = home_owner_pct, fill = race)) +
   #geom_line()
   geom_boxplot()
+
+meaninc_compare %>%
+  inner_join(student_debt, by = c("year", "race")) %>%
+  inner_join(retirement, by = c("year", "race")) %>%
+  group_by(race) %>%
+  summarize(mean(income_dollars), mean(loan_debt), mean(retirement)) %>%
+  knitr::kable(
+    caption = "Averages of family wealth indicators (2019 dollars)", 
+    col.names = c(
+      "Race",
+      "Mean income", 
+      "Loan debt", 
+      "Retirement savings"),
+    digits = 2)
 
 #home ownership over the yrs
 home_owner %>%
