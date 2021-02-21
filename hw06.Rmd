@@ -39,6 +39,8 @@ income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascienc
 
 ```
 
+simplified some datasets to only focus on white, non-white hispanic, black alone, asian alone
+
 The data provided here has been normalized to 2016 dollars in some datasets and to 2019 dollars in others. For consistency's sake, I will normalize all dollar amounts to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
 
 Currently, student_debt.csv (loan_debt), retirement.csv (retirement), and race_wealth.csv (wealth_family) are in 2016 dollars. 
@@ -54,14 +56,17 @@ income_mean <- income_mean %>%
 #reordering inc quint levels
 income_leveled <- c("Lowest", "Fourth", "Third", "Second", "Highest", "Top 5%")
 
-income_aggregate <- income_aggregate %>%
-  mutate(income_quintile = factor(income_quintile, levels = income_leveled)) 
+level_simple_data <- function(df) {
+  df %>%
+  mutate(income_quintile = factor(income_quintile, levels = income_leveled)) %>%
+  filter(!race %in% c("Asian Alone or in Combination", "Black Alone or in Combination", "White Alone"))
+}
 
-income_mean <- income_mean %>%
-  mutate(income_quintile = factor(income_quintile, levels = income_leveled))
+income_aggregate <- level_simple_data(income_aggregate) 
+income_mean <- level_simple_data(income_mean)
+
 
 # only keeping values normalized to 2019 & renaming middle quintile to "Third" for future df joining 
-
 
 # purchasing power rates
 start_2016 <- 1.05940
@@ -98,8 +103,9 @@ retirement <- normalize(retirement, retirement)
 
 income_aggregate %>%
   filter(race == "All Races") %>%
-  ggplot(mapping = aes(x = year, y = income_share, color = income_quintile, group = income_quintile)) +
-  geom_line()
+  ggplot(mapping = aes(x = year, y = income_share/100, color = income_quintile, group = income_quintile)) +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent)
 
 income_mean %>%
   filter(race == "All Races") %>%
@@ -109,9 +115,14 @@ income_mean %>%
 income_aggregate %>%
  # filter(year == "2019") %>%
   inner_join(income_mean, by = c("year", "race", "income_quintile")) %>% 
-  ggplot(mapping = aes(x = income_quintile, y = income_share, fill = income_quintile)) +
+  ggplot(mapping = aes(x = income_quintile, y = income_share/100, fill = income_quintile)) +
   geom_violin() +
-  facet_wrap(race ~ .)
+  facet_wrap(race ~ .) +
+    scale_y_continuous(labels = scales::percent) +
+  labs(title = "Income Share Across Race",
+       x = "", y = "Percentage of Income Share",
+       caption = "Source: The Urban Institute") +
+  theme(axis.text.x = element_blank())
 # so historically, highest income_quintile has had greatest share of income
 
 
@@ -140,8 +151,7 @@ home_owner %>%
 income_mean %>%
   filter(
     dollar_type == "2019 Dollars", #already did this earlier in set-up
-    income_quintile == "Third", # was originally "Middle" but then renamed this value
-    !race %in% c("Asian Alone or in Combination", "Black Alone or in Combination", "White Alone")
+    income_quintile == "Third" # was originally "Middle" but then renamed this value
     ) %>%
     group_by(year, race) %>%
   ggplot(mapping = aes(x = year, y = income_dollars, color = race)) +
