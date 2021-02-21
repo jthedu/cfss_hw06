@@ -181,11 +181,23 @@ compare_inc(home_owner, home_owner_pct) +
 
 ```{r, message = FALSE}
 home_owner %>% 
- # inner_join(student_debt, by = c("year", "race")) %>%
-  ggplot(mapping = aes(x = race, y = home_owner_pct, fill = race)) +
-  #geom_line()
-  geom_boxplot()
+  inner_join(student_debt, by = c("year", "race")) %>%
+  select(-loan_debt) %>%
+  pivot_longer(c(home_owner_pct, loan_debt_pct), 
+               names_to = "type", values_to = "percentages") %>%
+#  mutate(type = if_else())
+  ggplot(mapping = aes(x = race, fill = type)) +
+  geom_boxplot(aes(y = percentages)) +  
+  labs(title = "Home ownership and loan debt in families",
+       x = "Race", y = "Percentage of families",
+       caption = "Source: The Urban Institute",
+       fill = "") +
+  scale_fill_discrete(labels = c("Home ownership", "Student loan debt")) +
+  scale_y_continuous(labels = scales::percent) +
+  theme(legend.position = "bottom")
 
+  
+  
 meaninc_compare %>%
   inner_join(student_debt, by = c("year", "race")) %>%
   inner_join(retirement, by = c("year", "race")) %>%
