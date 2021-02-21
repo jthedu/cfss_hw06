@@ -36,7 +36,6 @@ home_owner <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience
 income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
 income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
 
-
 ```
 
 The data provided here has been normalized to 2016 dollars in some datasets and to 2019 dollars in others. For consistency's sake, I will normalize all dollar amounts to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
@@ -57,7 +56,8 @@ start_2016 <- 1.05940
 
 normalize <- function(df, column) {
   df %>%
-    mutate(glue_data("norm_{column}") := {{column}} * start_2016) 
+    mutate(normalized = {{column}} * start_2016)
+    #    mutate(glue_data("norm_{column}") := {{column}} * start_2016) 
     #  rename(glue('normalized_{{column}}') = {{normalized}})
   # per tidyverse rules, have to use {{}} to indicate I'm choosing a column 
   # https://dplyr.tidyverse.org/articles/programming.html 
@@ -75,7 +75,14 @@ retirement <- normalize(retirement, retirement)
 # visualizing aggregate income
 # recall: each income quintile has the same # of ppl in it
 
+#reordering inc quint levels
 income_leveled <- c("Lowest", "Fourth", "Third", "Second", "Highest", "Top 5%")
+
+income_aggregate <- income_aggregate %>%
+  mutate(income_quintile = factor(income_quintile, levels = income_leveled)) 
+
+income_mean <- income_mean %>%
+  mutate(income_quintile = factor(income_quintile, levels = income_leveled))
 
 # compare # of households to income_share
 income_aggregate %>%
@@ -90,8 +97,7 @@ income_aggregate %>%
 
 income_aggregate %>%
  # filter(year == "2019") %>%
-  inner_join(income_mean, by = c("year", "race", "income_quintile")) %>%
-  mutate(income_quintile = factor(income_quintile, levels = income_leveled)) %>% #rearranging inc quint levels 
+  inner_join(income_mean, by = c("year", "race", "income_quintile")) %>% 
   ggplot(mapping = aes(x = income_quintile, y = income_share, fill = income_quintile)) +
   geom_violin() +
   facet_wrap(race ~ .)
