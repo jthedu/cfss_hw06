@@ -89,8 +89,6 @@ retirement <- normalize(retirement, retirement)
   # per tidyverse rules, have to use {{}} to indicate I'm choosing a column 
   # https://dplyr.tidyverse.org/articles/programming.html 
 
-
-# possible to write func to overwrite original df? no
 # possible to write func so that normalized column name is "normalized_column"
 ```
 
@@ -105,27 +103,46 @@ income_aggregate %>%
   filter(race == "All Races") %>%
   ggplot(mapping = aes(x = year, y = income_share/100, color = income_quintile, group = income_quintile)) +
   geom_line() +
-  scale_y_continuous(labels = scales::percent)
+  scale_y_continuous(labels = scales::percent) +
+    labs(title = "Income Share by Income Group Over Time",
+       x = "Year", y = "Percentage of income share",
+       caption = "Source: The Urban Institute", color = "Income Quintile")
 
 income_mean %>%
   filter(race == "All Races") %>%
   ggplot(mapping = aes(x = year, y = income_dollars, color = income_quintile, group = income_quintile)) +
-  geom_line()
+  geom_line() +
+  labs(title = "Mean Income of Each Income Quintile Over Time",
+       x = "Year", y = "Mean income (in normalized 2019 dollars)",
+       caption = "Source: The Urban Institute", color = "Income Quintile") 
+
 
 income_aggregate %>%
- # filter(year == "2019") %>%
-  inner_join(income_mean, by = c("year", "race", "income_quintile")) %>% 
+#  inner_join(income_mean, by = c("year", "race", "income_quintile")) %>% 
   ggplot(mapping = aes(x = income_quintile, y = income_share/100, fill = income_quintile)) +
   geom_violin() +
   facet_wrap(race ~ .) +
     scale_y_continuous(labels = scales::percent) +
   labs(title = "Income Share Across Race",
        x = "", y = "Percentage of Income Share",
-       caption = "Source: The Urban Institute") +
+       caption = "Source: The Urban Institute",
+       fill = "Income Quintile") +
   theme(axis.text.x = element_blank())
 # so historically, highest income_quintile has had greatest share of income
+# should you even be making this graph?
 
 
+income_mean %>% #creating comparable income_mean df for retirement, debt, homeowner
+  filter(income_quintile == "Third") %>%
+  mutate(race = if_else(race == "Black Alone", "Black", race)) %>%
+  mutate(race = ifelse(race == "White, Not Hispanic", "White", race)) %>% #would stop here if want to make this its own obj
+  inner_join(retirement, by = c("year", "race")) %>%
+  ggplot(mapping = aes(x = income_dollars, y = retirement, color = race)) +
+  geom_line() +
+  labs(title = "Mean Family Income vs. Retirement Savings (normalized 2019 dollars)",
+       x = "Average family income", y = "Average family retirement savings",
+       caption = "Source: The Urban Institute",
+       color = "Income Quintile") 
 ```
 
 ```{r}
