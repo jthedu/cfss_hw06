@@ -1,10 +1,11 @@
 ---
-title: "HW06: Income Data"
+title: "HW06: Analyzing Urban Insitute Income Data"
 author: "Julia Du"
 date: "2/18/2021"
-output: 
+output:
   github_document:
     toc: true
+    html_preview: false
 ---
 
 ```{r setup, echo = FALSE}

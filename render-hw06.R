@@ -2,5 +2,5 @@
 
 library(tidyverse)
 
-rmarkdown::render('hw06.Rmd', output_format = "md_document", 
+rmarkdown::render('hw06.Rmd', 
                   output_file = "hw06-pretty.md")

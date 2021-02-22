@@ -1,15 +1,34 @@
+HW06: Analyzing Urban Insitute Income Data
+================
+Julia Du
+2/18/2021
+
+  - [Load necessary libraries](#load-necessary-libraries)
+  - [Get the Data](#get-the-data)
+  - [Simplifying (not tidying) Data](#simplifying-not-tidying-data)
+  - [Analyzing the Data](#analyzing-the-data)
+      - [Exploring Broad Income Trends](#exploring-broad-income-trends)
+      - [Exploring Income by Race](#exploring-income-by-race)
+      - [Other Metrics of Economic Inequality Across
+        Race](#other-metrics-of-economic-inequality-across-race)
+      - [Percentages of Home Ownership & Student Loan
+        Debt](#percentages-of-home-ownership--student-loan-debt)
+      - [Median Average Income &
+        Presidents](#median-average-income--presidents)
+
 ### Load necessary libraries
 
-    library(reprex)
-    library(tidyverse)
-    library(glue)
-    library(knitr)
-    library(lubridate)
+``` r
+library(reprex)
+library(tidyverse)
+library(glue)
+library(knitr)
+library(lubridate)
 
-    theme_set(theme_minimal())
+theme_set(theme_minimal())
+```
 
-Get the Data
-============
+# Get the Data
 
 I used Tidy Tuesday’s [02/09/2021 challenge
 data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-02-09).
@@ -17,8 +36,7 @@ This particular challenge comes from the Urban Institute and looks at
 income inequality. I also am using a dataset of presidents and their
 term length [found here](https://gist.github.com/namuol/2657233).
 
-Simplifying (not tidying) Data
-==============================
+# Simplifying (not tidying) Data
 
 The income data is already tidy, but I am further simplifying some of it
 for easier analysis.
@@ -36,13 +54,11 @@ that, at most, possible race values are only white, non-white Hispanic,
 Black alone, or Asian alone. (Some other datasets only had white,
 Hispanic, & Black as race values to begin with.)
 
-Analyzing the Data
-==================
+# Analyzing the Data
 
-Exploring Broad Income Trends
------------------------------
+## Exploring Broad Income Trends
 
-![](hw06-pretty_files/figure-markdown_strict/unnamed-chunk-2-1.png)![](hw06-pretty_files/figure-markdown_strict/unnamed-chunk-2-2.png)
+![](hw06-pretty_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->![](hw06-pretty_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
 
 Looking at the 1st graph, it’s clear that the highest income quintile
 has steadily increased its income share over time (from about 42% in the
@@ -58,10 +74,9 @@ from about $125,000 in the mid-1960s to over $250,00 in 2019. The top 5%
 has seen even more dramatic change over the past decades, rising from
 just under $200,000 in 1967 to nearly $450,000 in 2019.
 
-Exploring Income by Race
-------------------------
+## Exploring Income by Race
 
-![](hw06-pretty_files/figure-markdown_strict/unnamed-chunk-3-1.png)![](hw06-pretty_files/figure-markdown_strict/unnamed-chunk-3-2.png)
+![](hw06-pretty_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->![](hw06-pretty_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
 
 The 1st graph shows that the aforementioned increase in income for top
 quintiles has not been experienced equally by different racial groups.
@@ -86,42 +101,17 @@ see a general upward trend in mean income for all races in the 3rd
 income quintile – but race seems to play a significant role in
 determining mean income.
 
-Other Metrics of Economic Inequality Across Race
-------------------------------------------------
+## Other Metrics of Economic Inequality Across Race
 
-<table>
-<caption>Averages of Economic Inequality Metrics (2019 dollars)</caption>
-<thead>
-<tr class="header">
-<th style="text-align: left;">Race</th>
-<th style="text-align: right;">Mean income</th>
-<th style="text-align: right;">Loan debt</th>
-<th style="text-align: right;">Retirement savings</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Black</td>
-<td style="text-align: right;">39010.4</td>
-<td style="text-align: right;">5476.63</td>
-<td style="text-align: right;">18740.19</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Hispanic</td>
-<td style="text-align: right;">44972.8</td>
-<td style="text-align: right;">2613.73</td>
-<td style="text-align: right;">16836.83</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">White</td>
-<td style="text-align: right;">65233.0</td>
-<td style="text-align: right;">5002.01</td>
-<td style="text-align: right;">96034.23</td>
-</tr>
-</tbody>
-</table>
+| Race     | Mean income | Loan debt | Retirement savings |
+| :------- | ----------: | --------: | -----------------: |
+| Black    |     39010.4 |   5476.63 |           18740.19 |
+| Hispanic |     44972.8 |   2613.73 |           16836.83 |
+| White    |     65233.0 |   5002.01 |           96034.23 |
 
-![](hw06-pretty_files/figure-markdown_strict/unnamed-chunk-4-1.png)![](hw06-pretty_files/figure-markdown_strict/unnamed-chunk-4-2.png)![](hw06-pretty_files/figure-markdown_strict/unnamed-chunk-4-3.png)
+Averages of Economic Inequality Metrics (2019 dollars)
+
+![](hw06-pretty_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->![](hw06-pretty_files/figure-gfm/unnamed-chunk-4-2.png)<!-- -->![](hw06-pretty_files/figure-gfm/unnamed-chunk-4-3.png)<!-- -->
 
 As noted above, Black and Hispanic families generally see lower mean
 incomes than their white counterparts. This pattern continues for other
@@ -136,10 +126,9 @@ notably lower student loan debt, but we caution against hasty
 conclusions as there is not much data available for either student loan
 debt or retirement savings.
 
-Percentages of Home Ownership & Student Loan Debt
--------------------------------------------------
+## Percentages of Home Ownership & Student Loan Debt
 
-![](hw06-pretty_files/figure-markdown_strict/unnamed-chunk-5-1.png)
+![](hw06-pretty_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 This boxplot clarifies what we observed: white families have much higher
 %s of home ownership, but the % of families with student loan debt is
@@ -153,10 +142,9 @@ available on student loan debt. In general, being white seems to greatly
 increase one’s chances of owning a home, but the effect on having
 student loan debt is less clear.
 
-Median Average Income & Presidents
-----------------------------------
+## Median Average Income & Presidents
 
-![](hw06-pretty_files/figure-markdown_strict/president-1.png)
+![](hw06-pretty_files/figure-gfm/president-1.png)<!-- -->
 
 Out of curiosity, we see how the median average income, i.e. the average
 income for the third income quintile, has changed over different
