@@ -25,35 +25,39 @@ theme_set(theme_minimal())
 ```
 
 # Get the Data
-I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-02-09). This particular challenge comes from the Urban Institute and looks at racial wealth inequality over time.
 
-*income_time*
+I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-02-09). This particular challenge comes from the Urban Institute and looks at income inequality. I also am using a dataset of presidents and their term length [here](https://gist.github.com/namuol/2657233).
 
-```{r, message = FALSE, warning = FALSE}
-student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
-retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
-home_owner <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/home_owner.csv')
-income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
-income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
+Run [this script](download-hw06.R) to download the data for this .Rmd.
 
-```
+# Simplifying (not tidying) Data
 
-simplified some datasets to only focus on white, non-white hispanic, black alone, asian alone
+The income data is already tidy, but I am further simplifying some of it for easier analysis. 
 
-The data provided here has been normalized to 2016 dollars in some datasets and to 2019 dollars in others. For consistency's sake, I will normalize all dollar amounts to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
+Currently, student_debt.csv (in column loan_debt) and retirement.csv (retirement) are in 2016 dollars, but the income_mean.csv (income_dollars) is in 2019 dollars. For consistency, I'm normalizing all data to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
 
-Currently, student_debt.csv (loan_debt), retirement.csv (retirement), and race_wealth.csv (wealth_family) are in 2016 dollars. 
-
-income_mean.csv (income_dollars) is in 2019 dollars.
+I am also simplifying datasets so that possible race values are only white, non-white Hispanic, Black alone, or Asian alone.
 
 
-```{r cleanup}
+```{r simplify}
+# rate between 2016 & 2019 dollars
+start_2016 <- 1.05940
+
+# normalize dollar amounts to 2019
+student_debt <- student_debt %>%
+  mutate(loan_debt = loan_debt * start_2016)
+
+retirement <- retirement %>%
+  mutate(retirement = retirement *start_2016)
+
+# renaming middle quintile to "Third" for future df joining 
+# & keeping only 2019 dollar amounts
 income_mean <- income_mean %>%
   filter(dollar_type == "2019 Dollars") %>%
   mutate(income_quintile = if_else(income_quintile == "Middle", "Third", income_quintile))
 
-#reordering inc quint levels
-income_leveled <- c("Lowest", "Fourth", "Third", "Second", "Highest", "Top 5%")
+# reordering income quintile levels & simplify race values
+income_leveled <- c("Lowest", "Second", "Third", "Fourth", "Highest", "Top 5%")
 
 level_simple_data <- function(df) {
   df %>%
@@ -64,84 +68,62 @@ level_simple_data <- function(df) {
 income_aggregate <- level_simple_data(income_aggregate) 
 income_mean <- level_simple_data(income_mean)
 
+# DELETE THIS BIT
+#normalize <- function(df, column) {
+ # mutate(!! {{column}} := {{column}} * 2)
+#}
 
-# only keeping values normalized to 2019 & renaming middle quintile to "Third" for future df joining 
-
-# purchasing power rates
-start_2016 <- 1.05940
-
-normalize <- function(df, column) {
-  df %>%
-    mutate({column} = {{column}} * start_2016) 
-  #alternatively: mutate({{column}} = {{column}} * start_2016)
-}
-
-
-#student_debt 
-  normalize(df = student_debt, column = loan_debt)
-
-retirement <- normalize(retirement, retirement)
-
-    #    mutate(glue_data("norm_{column}") := {{column}} * start_2016) 
-    #  rename(glue('normalized_{{column}}') = {{normalized}})
-
-  # per tidyverse rules, have to use {{}} to indicate I'm choosing a column 
-  # https://dplyr.tidyverse.org/articles/programming.html 
-
-# possible to write func so that normalized column name is "normalized_column"
 ```
 
+# Analyzing the Data
+
+## Exploring Broad Income Trends
 
 ```{r}
-# visualizing aggregate income
-# recall: each income quintile has the same # of ppl in it
-
-### compare # of households to income_share
-
+# income share over time
 income_aggregate %>%
   filter(race == "All Races") %>%
   ggplot(mapping = aes(x = year, y = income_share/100, color = income_quintile, group = income_quintile)) +
   geom_line() +
   scale_y_continuous(labels = scales::percent) +
-    labs(title = "Income Share by Income Group Over Time",
+    labs(title = "Income Share of Each Income Group Over Time",
        x = "Year", y = "Percentage of income share",
        caption = "Source: The Urban Institute", color = "Income Quintile")
 
+# mean income over time
 income_mean %>%
   filter(race == "All Races") %>%
   ggplot(mapping = aes(x = year, y = income_dollars, color = income_quintile, group = income_quintile)) +
   geom_line() +
-  labs(title = "Mean Income of Each Income Quintile Over Time",
+  labs(title = "Mean Income of Each Income Group Over Time",
        x = "Year", y = "Mean income (in normalized 2019 dollars)",
        caption = "Source: The Urban Institute", color = "Income Quintile") +
   scale_y_continuous(labels = scales::dollar)
-
-income_aggregate %>%
-#  inner_join(income_mean, by = c("year", "race", "income_quintile")) %>% 
-  ggplot(mapping = aes(x = income_quintile, y = income_share/100, fill = income_quintile)) +
-  geom_violin() +
-  facet_wrap(race ~ .) +
-    scale_y_continuous(labels = scales::percent) +
-  labs(title = "Income Share Across Race",
-       x = "", y = "Percentage of Income Share",
-       caption = "Source: The Urban Institute",
-       fill = "Income Quintile") +
-  theme(axis.text.x = element_blank())
-# so historically, highest income_quintile has had greatest share of income
-# should you even be making this graph?
 ```
 
-```{r}
-# comparing mean income of median quintile of racial groups over the yrs
+## Exploring Income by Race
 
+```{r}
+# mean income for quintile by race
 income_mean %>%
-  filter(
-    dollar_type == "2019 Dollars", #already did this earlier in set-up
-    income_quintile == "Third" # was originally "Middle" but then renamed this value
-    ) %>%
+  ggplot(mapping = aes(x = income_quintile, y = income_dollars, fill = income_quintile)) +
+  geom_violin() +
+  geom_boxplot(width = 0.9, color = "grey", alpha = 0.3) +
+  facet_wrap(race ~ .) +
+    scale_y_continuous(labels = scales::dollar) +
+  labs(title = "Mean Income of Each Income Group Across Race",
+       x = "", y = "Mean income (normalized 2019 dollars)",
+       caption = "Source: The Urban Institute",
+       fill = "Income Quintile") +
+  theme(axis.text.x = element_blank()) +
+  theme(legend.position = "bottom") +
+  guides(fill = guide_legend(nrow = 1))
+
+# mean income overall by race
+income_mean %>%
+  filter(income_quintile == "Third") %>%
     group_by(year, race) %>%
   ggplot(mapping = aes(x = year, y = income_dollars, color = race)) +
-  #geom_line() +
   geom_point(alpha = .3) + 
   geom_smooth(method = lm, se = FALSE) +
   scale_color_viridis_d(option = "plasma", end = .7) +
@@ -149,9 +131,9 @@ income_mean %>%
        x = "Year", y = "Mean income (in normalized 2019 dollars)",
        caption = "Source: The Urban Institute", color = "Race") +
   scale_y_continuous(labels = scales::dollar)
-
 ```
 
+## Other Metrics of Economic Inequality Across Race
 
 ```{r, message = FALSE}
 # creating comparable mean income table 
@@ -178,7 +160,8 @@ compare_inc <- function(df, var){
 meaninc_compare %>% 
   inner_join({df}, by = c("year", "race")) %>%
   ggplot(mapping = aes(x = income_dollars, y = {{var}}, color = race)) +
-  geom_line() +
+  geom_point(alpha = .3) + 
+  geom_smooth(method = lm, se = FALSE) +
     scale_color_viridis_d(end = .7) +
   scale_x_continuous(labels = scales::dollar) +
     theme(legend.position = "bottom")
@@ -234,6 +217,7 @@ home_owner %>%
 ```
 
 
+## Income Inequality & Presidents
 
 ```{r president}
 pres_levels <- c("Lyndon B. Johnson", "Richard Nixon", "Gerald Ford", "Jimmy Carter", "Ronald Reagan", "George H. W. Bush", "Bill Clinton", "George W. Bush", "Barack Obama", "Donald Trump")
@@ -270,11 +254,12 @@ med_income_line <- pres_income_df %>%
 med_income_line + 
   geom_rect(data = president, 
             mapping = aes(NULL, NULL, xmin = start, xmax = end, 
-                          ymin = min(pres_income_df$income_dollars), ymax = max(pres_income_df$income_dollars), 
+                          ymin = min(pres_income_df$income_dollars), 
+                          ymax = max(pres_income_df$income_dollars), 
                           fill = name), 
-            alpha = 0.3) +
-  labs(fill = "President") +
-  theme(legend.position = "bottom")
+            alpha = 0.2) +
+  labs(fill = "President")   
+
 
 # makes sense. can see income tumbled during Carter's term (stagflation of 1970s) as well as 1st part of Obama's term (08 financial crisis)
 ```
