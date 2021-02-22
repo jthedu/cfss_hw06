@@ -27,18 +27,15 @@ theme_set(theme_minimal())
 
 I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-02-09). This particular challenge comes from the Urban Institute and looks at income inequality. I also am using a dataset of presidents and their term length [here](https://gist.github.com/namuol/2657233).
 
- ### **Run [this script](download-hw06.R) to download the data for this .Rmd.**
- # decide if to keep
-
 ```{r getdata}
-#downloading income inequality data
+# downloading income inequality data
 student_debt <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/student_debt.csv')
 retirement <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/retirement.csv')
 home_owner <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/home_owner.csv')
 income_aggregate <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_aggregate.csv')
 income_mean <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-02-09/income_mean.csv')
 
-#also download list of presidents & terms
+# also download list of presidents & terms
 president <- readr::read_csv('https://gist.githubusercontent.com/namuol/2657233/raw/74135b2637e624848c163759be9cd14ae33f5153/presidents.csv')
 ```
 
@@ -79,11 +76,6 @@ level_simple_data <- function(df) {
 
 income_aggregate <- level_simple_data(income_aggregate) 
 income_mean <- level_simple_data(income_mean)
-
-# DELETE THIS BIT
-#normalize <- function(df, column) {
- # mutate(!! {{column}} := {{column}} * 2)
-#}
 ```
 
 # Analyzing the Data
