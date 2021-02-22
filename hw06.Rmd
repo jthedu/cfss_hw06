@@ -8,8 +8,7 @@ output:
 ---
 
 ```{r setup, echo=FALSE}
-#knitr::opts_chunk$set(echo = TRUE)
-
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## Load necessary libraries
@@ -34,7 +33,7 @@ Run [this script](download-hw06.R) to download the data for this .Rmd.
 
 The income data is already tidy, but I am further simplifying some of it for easier analysis. 
 
-Currently, student_debt.csv (in column loan_debt) and retirement.csv (retirement) are in 2016 dollars, but the income_mean.csv (income_dollars) is in 2019 dollars. For consistency, I'm normalizing all data to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
+Originally, student_debt.csv (in column loan_debt) and retirement.csv (retirement) are in 2016 dollars, but the income_mean.csv (income_dollars) is in 2019 dollars. For consistency, I'm normalizing all data to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
 
 I am also simplifying datasets so that possible race values are only white, non-white Hispanic, Black alone, or Asian alone.
 
@@ -72,7 +71,6 @@ income_mean <- level_simple_data(income_mean)
 #normalize <- function(df, column) {
  # mutate(!! {{column}} := {{column}} * 2)
 #}
-
 ```
 
 # Analyzing the Data
@@ -86,7 +84,7 @@ income_aggregate %>%
   ggplot(mapping = aes(x = year, y = income_share/100, color = income_quintile, group = income_quintile)) +
   geom_line() +
   scale_y_continuous(labels = scales::percent) +
-    labs(title = "Income Share of Each Income Group Over Time",
+    labs(title = "Income Share of each Income Group over Time",
        x = "Year", y = "Percentage of income share",
        caption = "Source: The Urban Institute", color = "Income Quintile")
 
@@ -95,8 +93,8 @@ income_mean %>%
   filter(race == "All Races") %>%
   ggplot(mapping = aes(x = year, y = income_dollars, color = income_quintile, group = income_quintile)) +
   geom_line() +
-  labs(title = "Mean Income of Each Income Group Over Time",
-       x = "Year", y = "Mean income (in normalized 2019 dollars)",
+  labs(title = "Mean Income of each Income Group over Time",
+       x = "Year", y = "Mean income (2019 dollars)",
        caption = "Source: The Urban Institute", color = "Income Quintile") +
   scale_y_continuous(labels = scales::dollar)
 ```
@@ -111,8 +109,8 @@ income_mean %>%
   geom_boxplot(width = 0.9, color = "grey", alpha = 0.3) +
   facet_wrap(race ~ .) +
     scale_y_continuous(labels = scales::dollar) +
-  labs(title = "Mean Income of Each Income Group Across Race",
-       x = "", y = "Mean income (normalized 2019 dollars)",
+  labs(title = "Mean Income of each Income Group across Race",
+       x = "", y = "Mean income (2019 dollars)",
        caption = "Source: The Urban Institute",
        fill = "Income Quintile") +
   theme(axis.text.x = element_blank()) +
@@ -127,8 +125,8 @@ income_mean %>%
   geom_point(alpha = .3) + 
   geom_smooth(method = lm, se = FALSE) +
   scale_color_viridis_d(option = "plasma", end = .7) +
-  labs(title = "Mean Income by Race Over Time",
-       x = "Year", y = "Mean income (in normalized 2019 dollars)",
+  labs(title = "Median Average Income by Race over Time",
+       x = "Year", y = "Average income (2019 dollars)",
        caption = "Source: The Urban Institute", color = "Race") +
   scale_y_continuous(labels = scales::dollar)
 ```
@@ -148,7 +146,7 @@ meaninc_compare %>%
   group_by(race) %>%
   summarize(mean(income_dollars), mean(loan_debt), mean(retirement)) %>%
   knitr::kable(
-    caption = "Averages of family wealth indicators (2019 dollars)", 
+    caption = "Averages of Economic Inequality Metrics (2019 dollars)", 
     col.names = c(
       "Race",
       "Mean income", 
@@ -169,8 +167,8 @@ meaninc_compare %>%
 
 # retirement
 compare_inc(retirement, retirement) +
-  labs(title = "Mean Family Income vs. Mean Retirement Savings", 
-       subtitle = "(normalized 2019 dollars)",
+  labs(title = "Median Average Income vs. Average Retirement Savings", 
+       subtitle = "(2019 dollars)",
        x = "Average family income", y = "Average family retirement savings",
        caption = "Source: The Urban Institute",
        color = "Race") +
@@ -179,8 +177,8 @@ compare_inc(retirement, retirement) +
 
 # student debt
 compare_inc(student_debt, loan_debt) +
-  labs(title = "Mean Family Income vs. Mean Family Student Loan Debt", 
-       subtitle = "(normalized 2019 dollars)",
+  labs(title = "Median Average Income vs. Average Student Loan Debt", 
+       subtitle = "(2019 dollars)",
        x = "Average family income", y = "Average family student loan debt for aged 25-55",
        caption = "Source: The Urban Institute",
        color = "Race") +
@@ -188,14 +186,14 @@ compare_inc(student_debt, loan_debt) +
 
 # homeownership
 compare_inc(home_owner, home_owner_pct) +
-  labs(title = "Mean Family Income (normalized 2019 dollars) vs. Home Ownership",
-       x = "Average family income", y = "Home ownership percentage for families",
+  labs(title = "Median Average Income vs. Home Ownership",
+       x = "Average family income (2019 dollars)", y = "Home ownership percentage for families",
        caption = "Source: The Urban Institute",
        color = "Race") +
   scale_y_continuous(labels = scales::percent)
-
-
 ```
+
+## Percentages of Home Ownership & Student Loan Debt
 
 ```{r}
 home_owner %>% 
@@ -206,7 +204,7 @@ home_owner %>%
 #  mutate(type = if_else())
   ggplot(mapping = aes(x = race, fill = type)) +
   geom_boxplot(aes(y = percentages)) +  
-  labs(title = "Home ownership and loan debt in families",
+  labs(title = "Home Ownership and Loan Debt in Families",
        x = "Race", y = "Percentage of families",
        caption = "Source: The Urban Institute",
        fill = "") +
@@ -217,9 +215,9 @@ home_owner %>%
 ```
 
 
-## Income Inequality & Presidents
+## Median Average Income & Presidents
 
-```{r president}
+```{r president, message = FALSE}
 pres_levels <- c("Lyndon B. Johnson", "Richard Nixon", "Gerald Ford", "Jimmy Carter", "Ronald Reagan", "George H. W. Bush", "Bill Clinton", "George W. Bush", "Barack Obama", "Donald Trump")
 
 president <- president %>%
@@ -244,8 +242,8 @@ pres_income_df <- income_mean %>%
 med_income_line <- pres_income_df %>%
   ggplot(mapping = aes(x = year, y = income_dollars)) +
   geom_line() +
-  labs(title = "Mean U.S. income over time",
-       x = "Year", y = "Mean income (normalized 2019 dollars)",
+  labs(title = "Median Average U.S. Income",
+       x = "Year", y = "Average income (2019 dollars)",
        caption = "Source: The Urban Institute") +
   scale_y_continuous(label = scales::dollar)
 
@@ -259,7 +257,4 @@ med_income_line +
                           fill = name), 
             alpha = 0.2) +
   labs(fill = "President")   
-
-
-# makes sense. can see income tumbled during Carter's term (stagflation of 1970s) as well as 1st part of Obama's term (08 financial crisis)
 ```
