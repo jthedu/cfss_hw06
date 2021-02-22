@@ -4,21 +4,17 @@ Detailed instructions for this homework assignment are [here](https://cfss.uchic
 
 ## Executing the files
 
-Here is my [source code](.Rmd) & my [rendered report](.md).
+The [hw06.Rmd](hw06.Rmd) is a parameterized R Markdown file. You can either open the .Rmd & click the knit button, or you can run the [render-hw06.R](render-hw06.R) script to render it as the [hw06-pretty.md markdown document](hw06-pretty.md).
 
 ## Required packages
 
 You should have the following packages installed:
 
 ```r
+library(reprex)
 library(tidyverse)
 library(glue)
-library(gapminder)
-library(rcfss)
-
-library(ggthemes)
-library(ggridges)
-library(viridis)
 library(knitr)
+library(lubridate)
 
 ```

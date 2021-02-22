@@ -46,7 +46,7 @@ president <- readr::read_csv('https://gist.githubusercontent.com/namuol/2657233/
 
 The income data is already tidy, but I am further simplifying some of it for easier analysis. 
 
-Originally, student_debt.csv (in column loan_debt) and retirement.csv (retirement) are in 2016 dollars, but the income_mean.csv (income_dollars) is in 2019 dollars. For consistency, I'm normalizing all data to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
+Originally, student_debt.csv (i.e. its column loan_debt) and retirement.csv (i.e. its column retirement) are in 2016 dollars, but the income_mean.csv (i.e. its column income_dollars) is in 2019 dollars. For consistency, I'm normalizing all data to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
 
 I am also simplifying datasets so that possible race values are only white, non-white Hispanic, Black alone, or Asian alone.
 
