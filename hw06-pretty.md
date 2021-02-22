@@ -17,19 +17,17 @@ This particular challenge comes from the Urban Institute and looks at
 income inequality. I also am using a dataset of presidents and their
 term length [here](https://gist.github.com/namuol/2657233).
 
-\#\#\# **Run [this script](download-hw06.R) to download the data for
-this .Rmd.** \# decide if to keep
-
 Simplifying (not tidying) Data
 ==============================
 
 The income data is already tidy, but I am further simplifying some of it
 for easier analysis.
 
-Originally, student\_debt.csv (in column loan\_debt) and retirement.csv
-(retirement) are in 2016 dollars, but the income\_mean.csv
-(income\_dollars) is in 2019 dollars. For consistency, I’m normalizing
-all data to 2019 dollars, using [inflation rate
+Originally, student\_debt.csv (i.e. its column loan\_debt) and
+retirement.csv (i.e. its column retirement) are in 2016 dollars, but the
+income\_mean.csv (i.e. its column income\_dollars) is in 2019 dollars.
+For consistency, I’m normalizing all data to 2019 dollars, using
+[inflation rate
 info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13)
 based off average annual CPI data in the U.S. from 1914 to 2020.
 
