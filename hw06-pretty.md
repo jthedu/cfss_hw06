@@ -15,7 +15,7 @@ I used Tidy Tuesday’s [02/09/2021 challenge
 data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-02-09).
 This particular challenge comes from the Urban Institute and looks at
 income inequality. I also am using a dataset of presidents and their
-term length [here](https://gist.github.com/namuol/2657233).
+term length [found here](https://gist.github.com/namuol/2657233).
 
 Simplifying (not tidying) Data
 ==============================
@@ -31,8 +31,10 @@ For consistency, I’m normalizing all data to 2019 dollars, using
 info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13)
 based off average annual CPI data in the U.S. from 1914 to 2020.
 
-I am also simplifying datasets so that possible race values are only
-white, non-white Hispanic, Black alone, or Asian alone.
+I am also simplifying the income\_aggregate & income\_mean datasets so
+that, at most, possible race values are only white, non-white Hispanic,
+Black alone, or Asian alone. (Some other datasets only had white,
+Hispanic, & Black as race values to begin with.)
 
 Analyzing the Data
 ==================

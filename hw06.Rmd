@@ -25,7 +25,7 @@ theme_set(theme_minimal())
 
 # Get the Data
 
-I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-02-09). This particular challenge comes from the Urban Institute and looks at income inequality. I also am using a dataset of presidents and their term length [here](https://gist.github.com/namuol/2657233).
+I used Tidy Tuesday's [02/09/2021 challenge data](https://github.com/rfordatascience/tidytuesday/tree/master/data/2021/2021-02-09). This particular challenge comes from the Urban Institute and looks at income inequality. I also am using a dataset of presidents and their term length [found here](https://gist.github.com/namuol/2657233).
 
 ```{r getdata}
 # downloading income inequality data
@@ -45,7 +45,7 @@ The income data is already tidy, but I am further simplifying some of it for eas
 
 Originally, student_debt.csv (i.e. its column loan_debt) and retirement.csv (i.e. its column retirement) are in 2016 dollars, but the income_mean.csv (i.e. its column income_dollars) is in 2019 dollars. For consistency, I'm normalizing all data to 2019 dollars, using [inflation rate info](https://www.calculator.net/inflation-calculator.html?cstartingamount1=1&cinyear1=2016&coutyear1=2019&calctype=1&x=83&y=13) based off average annual CPI data in the U.S. from 1914 to 2020.
 
-I am also simplifying datasets so that possible race values are only white, non-white Hispanic, Black alone, or Asian alone.
+I am also simplifying the income_aggregate & income_mean datasets so that, at most, possible race values are only white, non-white Hispanic, Black alone, or Asian alone. (Some other datasets only had white, Hispanic, & Black as race values to begin with.)
 
 
 ```{r simplify}
@@ -98,8 +98,8 @@ income_mean %>%
   filter(race == "All Races") %>%
   ggplot(mapping = aes(x = year, y = income_dollars, color = income_quintile, group = income_quintile)) +
   geom_line() +
-  labs(title = "Mean Income of each Income Group over Time",
-       x = "Year", y = "Mean income (2019 dollars)",
+  labs(title = "Average Income of each Income Group over Time",
+       x = "Year", y = "Average income (2019 dollars)",
        caption = "Source: The Urban Institute", color = "Income Quintile") +
   scale_y_continuous(labels = scales::dollar)
 ```
@@ -119,8 +119,8 @@ income_mean %>%
   geom_boxplot(width = 0.9, color = "grey", alpha = 0.3) +
   facet_wrap(race ~ .) +
     scale_y_continuous(labels = scales::dollar) +
-  labs(title = "Mean Income of each Income Group across Race",
-       x = "", y = "Mean income (2019 dollars)",
+  labs(title = "Average Income of each Income Group across Race",
+       x = "", y = "Average income (2019 dollars)",
        caption = "Source: The Urban Institute",
        fill = "Income Quintile") +
   theme(axis.text.x = element_blank()) +
